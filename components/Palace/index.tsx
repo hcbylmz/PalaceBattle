@@ -2,78 +2,66 @@ import { View, Text, Pressable } from 'react-native'
 import React, { useState } from 'react'
 import styles from './styles'
 import Square from '../Square'
+import { checkValidity } from '../../helpers/helperFunctions'
 
 const Palace = () => {
     const [grid, setGrid] = useState(Array(9).fill(Array(9).fill("")));
 
     const [isMoveValid, setIsMoveValid] = useState(true);
 
-
-    const checkValidity = (newGrid) => {
+    const removeRelatedXMarks = (grid, rowIndex, colIndex) => {
+        // Remove 'x' from the row
         for (let i = 0; i < 9; i++) {
-            if (!isRowValid(newGrid[i])) return false;
-            if (!isColumnValid(newGrid, i)) return false;
+            if (grid[rowIndex][i] === "x") grid[rowIndex][i] = "";
         }
-        // Check diagonals only for "q" placements
-        for (let row = 0; row < 9; row++) {
-            for (let col = 0; col < 9; col++) {
-                if (newGrid[row][col] === "q" && !isDiagonalValid(newGrid, row, col)) {
-                    return false;
-                }
-            }
+
+        // Remove 'x' from the column
+        for (let i = 0; i < 9; i++) {
+            if (grid[i][colIndex] === "x") grid[i][colIndex] = "";
         }
-        return true;
+
+        // Remove 'x' from immediate diagonals (assuming you only marked diagonals with 'x')
+        if (rowIndex > 0 && colIndex > 0 && grid[rowIndex - 1][colIndex - 1] === "x") {
+            grid[rowIndex - 1][colIndex - 1] = "";
+        }
+        if (rowIndex > 0 && colIndex < 8 && grid[rowIndex - 1][colIndex + 1] === "x") {
+            grid[rowIndex - 1][colIndex + 1] = "";
+        }
+        if (rowIndex < 8 && colIndex > 0 && grid[rowIndex + 1][colIndex - 1] === "x") {
+            grid[rowIndex + 1][colIndex - 1] = "";
+        }
+        if (rowIndex < 8 && colIndex < 8 && grid[rowIndex + 1][colIndex + 1] === "x") {
+            grid[rowIndex + 1][colIndex + 1] = "";
+        }
     };
-    const isRowValid = (row) => {
-        let count = 0;
+
+    const markUnavailableSquares = (newGrid, rowIndex, colIndex) => {
+        // Mark row
         for (let i = 0; i < 9; i++) {
-            if (row[i] === "q") {
-                count++;
-            }
-            if (count > 1) {
-                return false;
-            }
+            if (newGrid[rowIndex][i] === "") newGrid[rowIndex][i] = "x"; // Mark row
         }
-        return true;
-    }
 
-    const isColumnValid = (grid, colIndex) => {
-        let count = 0;
+        // Mark column
         for (let i = 0; i < 9; i++) {
-            if (grid[i][colIndex] === "q") {
-                count++;
-            }
-            if (count > 1) {
-                return false;
-            }
+            if (newGrid[i][colIndex] === "") newGrid[i][colIndex] = "x"; // Mark column
         }
-        return true;
-    }
 
-    const isDiagonalValid = (grid, rowIndex, colIndex) => {
-        const diagonals = [
-            { row: -1, col: -1 }, // Top-left
-            { row: -1, col: 1 },  // Top-right
-            { row: 1, col: -1 },  // Bottom-left
-            { row: 1, col: 1 }    // Bottom-right
-        ];
-
-        for (let i = 0; i < diagonals.length; i++) {
-            const newRow = rowIndex + diagonals[i].row;
-            const newCol = colIndex + diagonals[i].col;
-            if (newRow >= 0 && newRow < 9 && newCol >= 0 && newCol < 9) {
-                if (grid[newRow][newCol] === "q") {
-                    console.log("diag", newRow, newCol, grid[newRow][newCol])
-                    return false;
-                }
-            }
+        // Mark immediate diagonals
+        if (rowIndex > 0 && colIndex > 0 && newGrid[rowIndex - 1][colIndex - 1] === "") {
+            newGrid[rowIndex - 1][colIndex - 1] = "x"; // Top-left
         }
-        return true;
-    }
-
+        if (rowIndex > 0 && colIndex < 8 && newGrid[rowIndex - 1][colIndex + 1] === "") {
+            newGrid[rowIndex - 1][colIndex + 1] = "x"; // Top-right
+        }
+        if (rowIndex < 8 && colIndex > 0 && newGrid[rowIndex + 1][colIndex - 1] === "") {
+            newGrid[rowIndex + 1][colIndex - 1] = "x"; // Bottom-left
+        }
+        if (rowIndex < 8 && colIndex < 8 && newGrid[rowIndex + 1][colIndex + 1] === "") {
+            newGrid[rowIndex + 1][colIndex + 1] = "x"; // Bottom-right
+        }
+    };
 
     const handleSquarePress = (rowIndex, colIndex) => {
-
         if (!isMoveValid && grid[rowIndex][colIndex] !== "q") return;
         const values = ["x", "q", ""];
         const newGrid = grid.map((row, rIndex) => {
@@ -89,9 +77,23 @@ const Palace = () => {
                 : row
         });
 
+        const cellValue = newGrid[rowIndex][colIndex];
+        if (cellValue === "q") {
+            // Create a copy of the grid before marking unavailable squares
+            const gridCopy = newGrid.map(row => [...row]);
+            markUnavailableSquares(gridCopy, rowIndex, colIndex);
+            setGrid(gridCopy); // Update the state with the modified copy
+        } else if (cellValue === "") {  // When removing a queen
+            const gridCopy = newGrid.map(row => [...row]);
+            // Remove 'x' marks related to the removed queen
+            removeRelatedXMarks(gridCopy, rowIndex, colIndex);
+            setGrid(gridCopy);
+        } else {
+            setGrid(newGrid); // Update the state with the unmodified grid
+        }
+
         const valid = checkValidity(newGrid);
         setIsMoveValid(valid);
-        setGrid(newGrid);
     };
 
     const handleClear = () => {
