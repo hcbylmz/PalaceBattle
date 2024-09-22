@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Pressable, Text } from 'react-native';
 import SquareRow from '../SquareRow';
+import { colors, shapes } from '../../constants/shapes';
 
 const Palace = () => {
     const NUM_OF_NEIGHBORS = 8;
-    const neighbors = [
+
+
+    const verticalHorizontal = [
         [-1, 0], // Up
         [1, 0],  // Down
         [0, -1], // Left
         [0, 1],  // Right
+    ]
+    const neighbors = [
+        ...verticalHorizontal,
         [-1, -1], // Up Left
         [-1, 1],  // Up Right
         [1, -1],  // Down Left
@@ -21,6 +27,7 @@ const Palace = () => {
 
 
 
+
     const generateGameAnswer = () => {
         const answer = [];
         const isSafe = (row, col, placedQueens) => {
@@ -30,6 +37,7 @@ const Palace = () => {
 
                 // Check diagonals
                 if (Math.abs(prevQueen.row - row) === Math.abs(prevQueen.col - col)) return false;
+
             }
             return true;
         };
@@ -65,13 +73,21 @@ const Palace = () => {
         generateGameAnswer();
     }, []);
 
+    // useEffect(() => {
+    //     if (gameAnswer.length > 0) {
+    //         const newGrid = [...grid];
+
+    //     }
+
+    // }, [gameAnswer])
+
     const generateGrid = () => {
         const newGrid = [];
 
         for (let row = 0; row < numberOfRegions; row++) {
             const newRow = [];
             for (let col = 0; col < numberOfRegions; col++) {
-                newRow.push({ value: "", isUserPlaced: false, regionColor: "red", parentTile: { row: null, col: null } });
+                newRow.push({ value: "", isUserPlaced: false, regionColor: null, parentTile: { row: null, col: null } });
             }
             newGrid.push(newRow);
         }
@@ -164,10 +180,76 @@ const Palace = () => {
 
     };
 
+    const handleShowAnswers = () => {
+
+
+        const newGrid = [...grid];
+
+
+
+        for (let row = 0; row < numberOfRegions; row++) {
+            for (let col = 0; col < numberOfRegions; col++) {
+                if (gameAnswer.find(answer => answer.row === row && answer.col === col)) {
+                    newGrid[row][col].value = "q";
+                }
+            }
+        }
+
+        setGrid(newGrid);
+    }
+
+    const handleGenerateRegion = () => {
+
+
+        const newGrid = [...grid];
+        for (let row = 0; row < numberOfRegions; row++) {
+            for (let col = 0; col < numberOfRegions; col++) {
+
+                newGrid[row][col].regionColor = null;
+
+            }
+        }
+
+
+
+        for (let i = 0; i < gameAnswer.length - 1; i++) {
+            const col = gameAnswer[i].col;
+            const row = gameAnswer[i].row;
+            const randomNumber = Math.floor(Math.random() * shapes.length);
+            const newShape = shapes[randomNumber];
+            console.log(newShape.name)
+            const coordinates = newShape.coordinates;
+
+            // for (let j= 0; j < coordinates.length; j++) {
+            //     if (row + coordinates[j][0] > 0 || row + coordinates[j][0] <= numberOfRegions || col + coordinates[j][1] > 0 || col + coordinates[j][1] <= numberOfRegions) {
+            //         newGrid[row + coordinates[i][0]][col + coordinates[i][1]].regionColor = "red";
+            //     }
+            // }
+            for (let j = 0; j < coordinates.length; j++) {
+                const newRow = row + coordinates[j][0];
+                const newCol = col + coordinates[j][1];
+
+                // Check if newRow and newCol are within the grid boundaries
+                if (newRow >= 0 && newRow < numberOfRegions && newCol >= 0 && newCol < numberOfRegions) {
+                    newGrid[newRow][newCol].regionColor = colors[i];
+                }
+            }
+
+        }
+
+        setGrid(newGrid);
+    }
+
 
 
     return (
         <View style={styles.container}>
+            <Pressable onPress={handleShowAnswers}>
+                <Text style={{ fontSize: 20 }}>Show answers</Text>
+            </Pressable>
+            <Pressable onPress={handleGenerateRegion}>
+                <Text style={{ fontSize: 20 }}>Generate region</Text>
+            </Pressable>
             {grid.map((row, rowIndex) => (
                 <SquareRow key={rowIndex} row={row} rowIndex={rowIndex} onPress={handleOnPressSquare} />
             ))}
