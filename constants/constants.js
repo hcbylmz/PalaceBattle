@@ -1,5 +1,5 @@
 
-export const colors = ["#800000", "#9A6324", "#f032e6", "#3cb44b", "#f58231", "#ffd8b1", "#e6194B", "#aaffc3", "#ffe119"]
+export const colors = ["#800000", "#9A6324", "#f032e6", "#3cb44b", "#f58231", "#00C0FF", "#e6194B", "#aaffc3", "#ffe119"]
 
 export const shapes = [
     {
@@ -54,13 +54,33 @@ export const shapes = [
         ]
     },
     {
-        name: "T Shape",
+        name: "Z Shape",
         coordinates: [
             [0, 0],
             [-1, 0],
             [0, -1],
             [1, -1],
         ]
+    },
+    {
+        name:"Horizontal Line Shape",
+        coordinates: [
+            [0, 0],
+            [0, 1],
+            [0, 2],
+            [0, 3],
+        ]
+    },
+    {
+        name: "Vertical Line Shape",
+        coordinates: [
+            [0, 0],
+            [1, 0],
+            [2, 0],
+            [3, 0],
+        ]
     }
+
+
 
 ]

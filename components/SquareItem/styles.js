@@ -9,7 +9,7 @@ export default StyleSheet.create({
       alignItems: 'center',
     },
     text: {
-      color: 'white',
+      color: 'black',
       fontSize: 20,
     },
   });

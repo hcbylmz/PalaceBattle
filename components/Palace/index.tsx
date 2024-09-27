@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Pressable, Text } from 'react-native';
 import SquareRow from '../SquareRow';
-import { colors, shapes } from '../../constants/shapes';
+import { colors, shapes } from '../../constants/constants';
 
 const Palace = () => {
     const NUM_OF_NEIGHBORS = 8;
@@ -237,6 +237,14 @@ const Palace = () => {
 
         }
 
+        for (let row = 0; row < numberOfRegions; row++) {
+            for (let col = 0; col < numberOfRegions; col++) {
+                if (newGrid[row][col].regionColor === null) {
+                    newGrid[row][col].regionColor = colors[colors.length - 1];
+                }
+            }
+        }
+
         setGrid(newGrid);
     }
 
@@ -273,5 +281,6 @@ const styles = StyleSheet.create({
         borderColor: 'black',
     },
 });
+
 
 export default Palace;
